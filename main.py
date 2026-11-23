@@ -11,19 +11,29 @@ import shutil
 MEME_FILE = "meme.png"
 
 
-def validate_image(path):
-    """Gate: the bounty only judges entry.png as a whole PNG or JPEG, at
-    most 1 MiB (1,048,576 bytes) and 1024 by 1024 pixels. Fail loudly here
-    rather than silently submitting an image that can never be judged."""
+def validate_size(path):
+    """Gate: the meme image must be at most 1 MiB (1,048,576 bytes)."""
     size = os.path.getsize(path)
     if size > 1048576:
         raise ValueError("meme image must be at most 1 MiB")
+
+
+def validate_format(path):
+    """Gate: the meme image must be a PNG or JPEG (checked by magic bytes)."""
     with open(path, "rb") as f:
         head = f.read(8)
     is_png = head[:8] == b"\x89PNG\r\n\x1a\n"
     is_jpeg = head[:3] == b"\xff\xd8\xff"
     if not (is_png or is_jpeg):
         raise ValueError("meme image must be a PNG or JPEG")
+
+
+def validate_image(path):
+    """Gate: the bounty only judges entry.png as a whole PNG or JPEG, at
+    most 1 MiB (1,048,576 bytes) and 1024 by 1024 pixels. Fail loudly here
+    rather than silently submitting an image that can never be judged."""
+    validate_size(path)
+    validate_format(path)
 
 
 def main():
